@@ -37,21 +37,28 @@ public class OpenCartTestRegister {
     }
 
     @After
-    public void deleteFromDatabase() throws SQLException {
-        connectToDB();
-        String query1 = "DELETE FROM oc_customer WHERE firstname=? and lastname=?   and email=?  and telephone=?  ;";
-        PreparedStatement pst1 = connection.prepareStatement(query1);
-        pst1.setString(1, FIRSTNAME);
-        pst1.setString(2, LASTNAME);
-        pst1.setString(3, EMAIL);
-        pst1.setString(4, TELEPHONE);
-        pst1.executeUpdate();
-        // connection.commit();
-        connection.close();
+    public void deleteFromDatabase() {
+
+        try {
+            connectToDB();
+            String query1 = "DELETE FROM oc_customer WHERE firstname=? and lastname=?   and email=?  and telephone=?  ;";
+            PreparedStatement pst1 = connection.prepareStatement(query1);
+            pst1.setString(1, FIRSTNAME);
+            pst1.setString(2, LASTNAME);
+            pst1.setString(3, EMAIL);
+            pst1.setString(4, TELEPHONE);
+            pst1.executeUpdate();
+            // connection.commit();
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
     @Test
-    public void testOpenCartLogInBySubmitMozilla() throws InterruptedException, SQLException {
+    public void testOpenCartLogInBySubmitMozilla()   {
         System.setProperty("webdriver.gecko.driver",
                 "D:/Eclipse/geckodriver-v0.19.0-win64/geckodriver.exe");
         WebDriver driver = new FirefoxDriver();
@@ -88,21 +95,23 @@ public class OpenCartTestRegister {
         driver.findElement(By.name("postcode")).click();
         driver.findElement(By.name("postcode")).sendKeys(POSTCODE);
 
-        //driver.findElement(By.name("country_id")).clear();
         driver.findElement(By.name("country_id")).click();
         driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 
-        driver.findElement(By.xpath("//*[@id=\"input-country\"]/option[237]")).click();
-        //driver.findElement(By.linkText("Ukraine")).click();
+        WebDriverWait wait = new WebDriverWait(driver, 10);
+        WebElement element = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//option[text()='Ukraine']")));
 
-        // driver.findElement(By.name("zone_id")).clear();
-        driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
-        driver.findElement(By.cssSelector("#input-zone")).click();
-        //Thread.sleep(2000);
-        driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+        driver.findElement(By.xpath("//option[text()='Ukraine']")).click();
 
-        driver.findElement(By.xpath("//*[@id=\"input-zone\"]/option[15]")).click();
-        //   driver.findElement(By.partialLinkText("L'vivs'ka Oblast'")).click();
+
+        driver.findElement(By.name("zone_id")).click();
+
+
+        wait = new WebDriverWait(driver, 10);
+        element = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//option[contains(text(),'Oblast')]")));
+
+        driver.findElement(By.xpath("//option[text()=\"L'vivs'ka Oblast'\"]")).click();
 
 
         driver.findElement(By.name("password")).clear();
@@ -115,18 +124,17 @@ public class OpenCartTestRegister {
         driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 
         driver.findElement(By.name("agree")).click();
-        driver.findElement(By.xpath("//*[@id=\"content\"]/form/div/div/input[2]")).click();
-        String actualtext = driver.findElement(By.xpath("//h1")).getText();
-        Assert.assertEquals(actualtext, "Your Account Has Been Created!");
+
+        driver.findElement(By.xpath("//*[@type='submit'][@value='Continue']")).click();
+
+
+        Assert.assertEquals("Your Account Has Been Created!", driver.findElement(By.xpath("//h1")).getText());
 
         driver.quit();
-
-        //    deleteFromDatabase();
-
     }
 
     @Test
-    public void testOpenCartLogInBySubmitChrome() throws SQLException, InterruptedException {
+    public void testOpenCartLogInBySubmitChrome()   {
         System.setProperty("webdriver.chrome.driver",
                 "D:/Eclipse/chromedriver_win32/chromedriver.exe");
         WebDriver driver = new ChromeDriver();
@@ -163,24 +171,23 @@ public class OpenCartTestRegister {
         driver.findElement(By.name("postcode")).click();
         driver.findElement(By.name("postcode")).sendKeys(POSTCODE);
 
-        //driver.findElement(By.name("country_id")).clear();
         driver.findElement(By.name("country_id")).click();
         driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 
-        driver.findElement(By.xpath("//*[@id=\"input-country\"]/option[237]")).click();
-        //driver.findElement(By.linkText("Ukraine")).click();
-
-        // driver.findElement(By.name("zone_id")).clear();
-        driver.findElement(By.cssSelector("#input-zone")).click();
-        // ! ! !  Thread.sleep(1000);
-
         WebDriverWait wait = new WebDriverWait(driver, 10);
+        WebElement element = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//option[text()='Ukraine']")));
 
-        WebElement element = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id=\"input-zone\"]/option[15]")));
+        driver.findElement(By.xpath("//option[text()='Ukraine']")).click();
 
 
-        driver.findElement(By.xpath("//*[@id=\"input-zone\"]/option[15]")).click();
-        //   driver.findElement(By.partialLinkText("L'vivs'ka Oblast'")).click();
+        driver.findElement(By.name("zone_id")).click();
+
+
+        wait = new WebDriverWait(driver, 10);
+        element = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//option[contains(text(),'Oblast')]")));
+
+        driver.findElement(By.xpath("//option[text()=\"L'vivs'ka Oblast'\"]")).click();
 
 
         driver.findElement(By.name("password")).clear();
@@ -193,14 +200,11 @@ public class OpenCartTestRegister {
         driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 
         driver.findElement(By.name("agree")).click();
-        driver.findElement(By.xpath("//*[@id=\"content\"]/form/div/div/input[2]")).click();
 
-        ///    //*[@id="content"]/h1
+        driver.findElement(By.xpath("//*[@type='submit'][@value='Continue']")).click();
 
-        String actualtext = driver.findElement(By.xpath("//h1")).getText();
-        Assert.assertEquals(actualtext, "Your Account Has Been Created!");
 
-///   "Your Account Has Been Created!"
+        Assert.assertEquals("Your Account Has Been Created!", driver.findElement(By.xpath("//h1")).getText());
 
         driver.quit();
     }
